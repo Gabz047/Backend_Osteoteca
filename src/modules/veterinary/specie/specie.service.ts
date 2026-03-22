@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import BaseService from "../../../shared/utils/baseModels/baseService";
 import Bone from "../bone/bone.model";
 import Specie from "./specie.model";
@@ -24,11 +24,11 @@ class SpecieService extends BaseService<Specie> {
         return this.repository.create(data)
     }
 
-    async incrementTotalQuantity(specieId: string): Promise<Specie> {
-        const findSpecie = await Specie.findByPk(specieId)
+    async incrementTotalQuantity(specieId: string, quantityToAdd: number, transaction?: Transaction): Promise<Specie> {
+        const findSpecie = await Specie.findByPk(specieId, { transaction })
         if (!findSpecie) throw new Error('Espécie não encontrada')
         
-        await findSpecie.increment('totalQuantity')
+        await findSpecie.increment('totalQuantity', { by: quantityToAdd, transaction })
 
         return findSpecie
     }

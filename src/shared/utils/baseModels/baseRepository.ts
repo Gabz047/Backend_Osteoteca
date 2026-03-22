@@ -1,36 +1,46 @@
-import {Model, ModelStatic, WhereOptions, Transaction} from 'sequelize'
+import { Model, ModelStatic, FindOptions, CreateOptions, UpdateOptions, DestroyOptions } from 'sequelize'
 
 class BaseRepository<T extends Model> {
-    protected model: ModelStatic<T>
+  protected model: ModelStatic<T>
 
-    constructor(model: ModelStatic<T>) {
-        this.model = model
-    }
+  constructor(model: ModelStatic<T>) {
+    this.model = model
+  }
 
-    findAll(where?: WhereOptions, transaction?: Transaction): Promise<T[]> {
-        return this.model.findAll({ where, transaction })
-    }
+  findAll(options?: FindOptions): Promise<T[]> {
+    return this.model.findAll(options)
+  }
 
-    findById(id: string, transaction?: Transaction): Promise<T | null> {
-        return this.model.findByPk(id, {transaction})
-    }
+  findById(id: string, options?: FindOptions): Promise<T | null> {
+    return this.model.findByPk(id, options)
+  }
 
-    create(data: Partial<T['_creationAttributes']>, transaction?: Transaction): Promise<T> {
-        return this.model.create(data as any, { transaction })
-    }
+  create(
+    data: Partial<T['_creationAttributes']>,
+    options?: CreateOptions
+  ): Promise<T> {
+    return this.model.create(data as any, options)
+  }
 
-    async update(id: string, data: Partial<T['_creationAttributes']>, transaction?: Transaction): Promise<T | null> {
-        const record = await this.model.findByPk(id, { transaction })
-        if (!record) return null
-        return record.update(data as any, { transaction })
-    }
+  async update(
+    id: string,
+    data: Partial<T['_creationAttributes']>,
+    options?: UpdateOptions
+  ): Promise<T | null> {
+    const record = await this.model.findByPk(id, options)
+    if (!record) return null
+    return record.update(data as any, options)
+  }
 
-    async delete(id: string, transaction?: Transaction): Promise<boolean> {
-        const record = await this.model.findByPk(id, { transaction })
-        if (!record) return false
-        await record.destroy({ transaction })
-        return true
-    }
+  async delete(
+    id: string,
+    options?: DestroyOptions
+  ): Promise<boolean> {
+    const record = await this.model.findByPk(id, options)
+    if (!record) return false
+    await record.destroy(options)
+    return true
+  }
 }
 
 export default BaseRepository

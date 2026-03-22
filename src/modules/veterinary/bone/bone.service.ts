@@ -1,3 +1,4 @@
+import sequelize from "../../../config/sequelize";
 import BaseService from "../../../shared/utils/baseModels/baseService";
 import Specie from "../specie/specie.model";
 import specieService from "../specie/specie.service";
@@ -6,47 +7,53 @@ import boneRepository from "./bone.repository";
 import { BoneCreationAttributes, BoneWithSpecie } from "./bone.types";
 
 class BoneService extends BaseService<Bone> {
-    constructor() {
-        super(boneRepository)
+  constructor() {
+    super(boneRepository);
+  }
+
+  async create(data: Partial<BoneCreationAttributes>): Promise<Bone> {
+    if (!data.specieId) {
+      throw new Error("SpecieId é obrigatório");
     }
 
-    async create(data: Partial<BoneCreationAttributes>): Promise<Bone> {
-        const findSpecie = await Specie.findByPk(data.specieId)
+    return sequelize.transaction(async (transaction) => {
+      const specie = await Specie.findByPk(data.specieId, { transaction });
 
-        if (!data.specieId) {
-            throw new Error('SpecieId é obrigatório')
-        }
+      if (!specie) {
+        throw new Error("Espécie não encontrada");
+      }
 
-        if (findSpecie) {
-            specieService.incrementTotalQuantity(data.specieId)   
-        }
+      await specieService.incrementTotalQuantity(specie.id, (data.quantity || 0) , transaction);
 
-        return this.repository.create(data)
+      const bone = await this.repository.create(data, { transaction });
 
-    }
 
-    findAll(): Promise<BoneWithSpecie[]> {
-        return Bone.findAll({
-            include: [
-                  {
-                    model: Specie,
-                    as: 'specie',
-                    attributes: ['name']
-                }
-            ]
-        }) as unknown as Promise<BoneWithSpecie[]>
-    }
+      return bone;
+    });
+  }
 
-    findById(id: string): Promise<BoneWithSpecie | null> {
-        return Bone.findByPk(id, {
-            include: [
-                {
-                    model: Specie,
-                    as: 'specie',
-                }
-            ]
-        }) as unknown as Promise<BoneWithSpecie | null>
-    }
+  findAll(): Promise<BoneWithSpecie[]> {
+    return Bone.findAll({
+      include: [
+        {
+          model: Specie,
+          as: "specie",
+          attributes: ["name"],
+        },
+      ],
+    }) as unknown as Promise<BoneWithSpecie[]>;
+  }
+
+  findById(id: string): Promise<BoneWithSpecie | null> {
+    return Bone.findByPk(id, {
+      include: [
+        {
+          model: Specie,
+          as: "specie",
+        },
+      ],
+    }) as unknown as Promise<BoneWithSpecie | null>;
+  }
 }
 
-export default new BoneService()
+export default new BoneService();

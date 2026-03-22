@@ -1,32 +1,39 @@
-import { Model, Transaction } from "sequelize";
+import { Model, FindOptions, CreateOptions, UpdateOptions, DestroyOptions } from "sequelize";
 import BaseRepository from "./baseRepository";
 
 class BaseService<T extends Model> {
-    protected repository: BaseRepository<T>
+  protected repository: BaseRepository<T>
 
-    constructor(repository: BaseRepository<T>) {
-        this.repository = repository
-    }
+  constructor(repository: BaseRepository<T>) {
+    this.repository = repository
+  }
 
-    findAll() {
-        return this.repository.findAll()
-    }
+  findAll(options?: FindOptions) {
+    return this.repository.findAll(options)
+  }
 
-    findById(id: string) {
-        return this.repository.findById(id)
-    }
+  findById(id: string, options?: FindOptions) {
+    return this.repository.findById(id, options)
+  }
 
-    create(data: Partial<T['_creationAttributes']>) {
-        return this.repository.create(data)
-    }
+  create(
+    data: Partial<T['_creationAttributes']>,
+    options?: CreateOptions
+  ) {
+    return this.repository.create(data, options)
+  }
 
-    update(id: string, data: Partial<T['_creationAttributes']>) {
-        return this.repository.update(id, data)
-    }
+  update(
+    id: string,
+    data: Partial<T['_creationAttributes']>,
+    options?: UpdateOptions
+  ) {
+    return this.repository.update(id, data, options)
+  }
 
-    delete(id: string) {
-        return this.repository.delete(id)
-    }
+  delete(id: string, options?: DestroyOptions) {
+    return this.repository.delete(id, options)
+  }
 }
 
 export default BaseService
