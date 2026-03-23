@@ -17,7 +17,7 @@ export class BoneService extends BaseService<Bone, BoneRepository> {
     
 
     return sequelize.transaction(async (transaction) => {
-      const alreadyExistsWithSpecifications = await this.findOne({where: {
+      const alreadyExistsWithSpecifications = await this.repository.findOne({where: {
         name: data.name,
         specieId: specieId,
       },
