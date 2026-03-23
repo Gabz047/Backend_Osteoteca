@@ -9,7 +9,7 @@ class BoneController extends BaseController<Bone, BoneService> {
         this.router.post('/:id/increment', this.incrementQuantity)
     }
 
-    async incrementQuantity (req: Request, res: Response): Promise<Response> {
+    incrementQuantity = async (req: Request, res: Response): Promise<Response> => {
         try {
             const { quantity } = req.body
             const { id } = req.params as {id: string}

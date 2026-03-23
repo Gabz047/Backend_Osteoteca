@@ -38,6 +38,9 @@ export class BoneService extends BaseService<Bone, BoneRepository> {
   async incrementQuantity(boneId: string, quantityToAdd: number): Promise<void> {
     if (!boneId) throw new Error("BoneId é obrigatório")
 
+      const quantity = Number(quantityToAdd)
+      if (!quantity || quantity <= 0) throw new Error('Quantidade deve ser maior que zero')
+
        await this.repository.incrementQuantity(boneId, quantityToAdd)
 
   }
