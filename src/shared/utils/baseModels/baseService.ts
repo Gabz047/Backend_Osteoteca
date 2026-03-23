@@ -1,10 +1,10 @@
 import { Model, FindOptions, CreateOptions, UpdateOptions, DestroyOptions } from "sequelize";
 import BaseRepository from "./baseRepository";
 
-class BaseService<T extends Model> {
-  protected repository: BaseRepository<T>
+class BaseService<T extends Model, Trepo extends BaseRepository<T> = BaseRepository<T>> {
+  protected repository: Trepo
 
-  constructor(repository: BaseRepository<T>) {
+  constructor(repository: Trepo) {
     this.repository = repository
   }
 
@@ -14,6 +14,10 @@ class BaseService<T extends Model> {
 
   findById(id: string, options?: FindOptions) {
     return this.repository.findById(id, options)
+  }
+
+  findOne(options?: FindOptions) {
+    return this.repository.findOne(options)
   }
 
   create(

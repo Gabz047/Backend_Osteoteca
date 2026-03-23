@@ -1,29 +1,32 @@
+import { Op } from "sequelize";
 import sequelize from "../../../config/sequelize";
 import BaseService from "../../../shared/utils/baseModels/baseService";
 import Specie from "../specie/specie.model";
 import specieService from "../specie/specie.service";
 import Bone from "./bone.model";
-import boneRepository from "./bone.repository";
+import boneRepository, { BoneRepository } from "./bone.repository";
 import { BoneCreationAttributes, BoneWithSpecie } from "./bone.types";
-
-class BoneService extends BaseService<Bone> {
+export class BoneService extends BaseService<Bone, BoneRepository> {
   constructor() {
     super(boneRepository);
   }
 
   async create(data: Partial<BoneCreationAttributes>): Promise<Bone> {
-    if (!data.specieId) {
-      throw new Error("SpecieId é obrigatório");
-    }
+    const specieId = data.specieId
+    if (!specieId) throw new Error("SpecieId é obrigatório");
+    
 
     return sequelize.transaction(async (transaction) => {
-      const specie = await Specie.findByPk(data.specieId, { transaction });
+      const alreadyExistsWithSpecifications = await this.findOne({where: {
+        name: data.name,
+        specieId: specieId,
+      },
+      transaction
+    })
 
-      if (!specie) {
-        throw new Error("Espécie não encontrada");
-      }
+      if (alreadyExistsWithSpecifications) throw new Error('Osso com este nome já existe para esta espécie')
 
-      await specieService.incrementTotalQuantity(specie.id, (data.quantity || 0) , transaction);
+      await specieService.incrementTotalQuantity(specieId, (data.quantity || 0) , transaction);
 
       const bone = await this.repository.create(data, { transaction });
 
@@ -32,8 +35,15 @@ class BoneService extends BaseService<Bone> {
     });
   }
 
+  async incrementQuantity(boneId: string, quantityToAdd: number): Promise<void> {
+    if (!boneId) throw new Error("BoneId é obrigatório")
+
+       await this.repository.incrementQuantity(boneId, quantityToAdd)
+
+  }
+
   findAll(): Promise<BoneWithSpecie[]> {
-    return Bone.findAll({
+    return this.repository.findAll({
       include: [
         {
           model: Specie,
@@ -45,7 +55,7 @@ class BoneService extends BaseService<Bone> {
   }
 
   findById(id: string): Promise<BoneWithSpecie | null> {
-    return Bone.findByPk(id, {
+    return this.repository.findById(id, {
       include: [
         {
           model: Specie,

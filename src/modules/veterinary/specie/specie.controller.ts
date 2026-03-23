@@ -1,8 +1,8 @@
 import BaseController from "../../../shared/utils/baseModels/baseController";
 import Specie from "./specie.model";
-import specieService from "./specie.service";
+import specieService, { SpecieService } from "./specie.service";
 
-class SpecieController extends BaseController<Specie> {
+class SpecieController extends BaseController<Specie, SpecieService> {
     constructor() {
         super(specieService)
     }

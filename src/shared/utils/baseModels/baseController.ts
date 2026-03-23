@@ -2,11 +2,11 @@ import { Request, Response, Router } from "express";
 import { Model } from "sequelize";
 import BaseService from "./baseService";
 
-class BaseController<T extends Model> {
+class BaseController<T extends Model, Tservice extends BaseService<T> = BaseService<T>> {
     public router: Router
-    protected service: BaseService<T>
+    protected service: Tservice
 
-    constructor(service: BaseService<T>) {
+    constructor(service: Tservice) {
         this.service = service
         this.router = Router()
         this.registerBaseRoutes()

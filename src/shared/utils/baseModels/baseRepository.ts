@@ -11,6 +11,10 @@ class BaseRepository<T extends Model> {
     return this.model.findAll(options)
   }
 
+  findOne(options?: FindOptions): Promise<T | null> {
+    return this.model.findOne(options)
+  }
+
   findById(id: string, options?: FindOptions): Promise<T | null> {
     return this.model.findByPk(id, options)
   }
